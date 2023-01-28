@@ -18,7 +18,7 @@ public class StillObject : IDrawing
         Rectangle = spritesheet.GetRectangle(position);
     }
 
-    public void Draw(Vector2 pos, bool flipX = false, bool flipY = false, float rotation = 0f)
+    public void Draw(Vector2 pos, bool flipX = false, bool flipY = false, float rotation = 0f, Vector2? origin = null)
     {
         var spriteEffects = SpriteEffects.None;
         if (flipX)

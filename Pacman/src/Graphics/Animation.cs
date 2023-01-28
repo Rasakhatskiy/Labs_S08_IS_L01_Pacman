@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Specialized;
 using BebraProject.Graphics;
 
 using Microsoft.Xna.Framework;
@@ -74,7 +75,9 @@ public class Animation : IDrawing
         }
     }
 
-    public void Draw(Vector2 pos, bool flipX = false, bool flipY = false, float rotation = 0f)
+    public void Draw(Vector2 pos, 
+        bool flipX = false, bool flipY = false, 
+        float rotation = 0f, Vector2? origin = null)
     {
         var spriteEffects = SpriteEffects.None;
         if (flipX)
@@ -89,13 +92,15 @@ public class Animation : IDrawing
         
         // pos += camera.Position;
         
+        
+        
         Globals.SpriteBatch.Draw(
             _spritesheet.Texture, 
             pos, 
             _sourceRectangles[CurrentFrame], 
             Color.White, 
-            0, 
-            Vector2.Zero, 
+            rotation, 
+            origin ?? Vector2.Zero, 
             Vector2.One, 
             spriteEffects, 
             1);

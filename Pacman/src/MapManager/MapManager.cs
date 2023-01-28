@@ -1,4 +1,5 @@
-﻿using BebraProject.Animation;
+﻿using System;
+using BebraProject.Animation;
 using Microsoft.Xna.Framework;
 
 namespace Pacman.MapManager;
@@ -41,6 +42,20 @@ public class MapManager
         }
     }
 
+    public Point GetCentralEmptyPoint()
+    {
+        var midldePoint = new Point(_size.X / 2, _size.Y / 2);
+        while (Map[midldePoint.X, midldePoint.Y] == 1)
+        {
+            midldePoint.Y--;
+        }
+
+        if (midldePoint.Y > _size.Y * 2)
+            throw new Exception("LOH");
+
+        return midldePoint;
+    }
+    
     private StillObject _tile;
     private readonly Point _size;
     public readonly Vector2 TileSize = new Vector2(16, 16);
