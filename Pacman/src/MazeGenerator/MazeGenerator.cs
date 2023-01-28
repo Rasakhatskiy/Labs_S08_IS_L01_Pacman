@@ -62,6 +62,30 @@ public class MazeGenerator
 
 		for (int i = 0; i < _size.X * 2 + 1; i++)
 			result[i, _size.Y * 2] = 1;
+
+		var toDestroy = (int)(Math.Max(_size.X * 2, _size.Y * 2) * 1);
+
+		for (int i = 0; i < toDestroy; i++)
+		{
+			var destroyed = false;
+			while (!destroyed)
+			{
+				var x = _random.Next(1, _size.X * 2);
+				var y = _random.Next(1, _size.Y * 2);
+				
+				if (result[x - 1, y - 1] == 0 &&
+				    result[x - 1, y + 1] == 0 &&
+				    result[x + 1, y - 1] == 0 &&
+				    result[x + 1, y + 1] == 0)
+					continue;
+				
+				if (result[x, y] == 1)
+				{
+					result[x, y] = 0;
+					destroyed = true;
+				}
+			}
+		}
 		
 		return result;
 	}

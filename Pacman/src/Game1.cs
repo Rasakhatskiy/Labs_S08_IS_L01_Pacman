@@ -11,31 +11,25 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
+    private readonly Point GridSize = new (8, 8);
+    
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
+        _mapManager = new MapManager.MapManager(GridSize);
     }
 
     protected override void Initialize()
     {
-        MazeGenerator.MazeGenerator maze = new MazeGenerator.MazeGenerator(
-            new Point(8, 8),
-            new Point(0, 0),
-            4);
-
-        var arr = maze.GetArray();
-        for (int j = 0; j < arr.GetLength(1); j++)
-        {
-            for (int i = 0; i < arr.GetLength(0); i++)
-            {
-                Debug.Write(arr[i,j] == 1 ? "#" : " ");
-            }
-            Debug.WriteLine("");
-        }
-
+        Globals.Content = Content;
+        _mapManager.Init();
         
+        _graphics.PreferredBackBufferWidth = GridSize.X * ((int)_mapManager.TileSize.X * 2 + 1);
+        _graphics.PreferredBackBufferHeight = GridSize.Y * ((int)_mapManager.TileSize.Y * 2 + 1);
+        _graphics.ApplyChanges();
+
 
         base.Initialize();
     }
@@ -43,7 +37,7 @@ public class Game1 : Game
     protected override void LoadContent()
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
-
+        Globals.SpriteBatch = _spriteBatch;
         // TODO: use this.Content to load your game content here
     }
 
@@ -53,17 +47,24 @@ public class Game1 : Game
             Keyboard.GetState().IsKeyDown(Keys.Escape))
             Exit();
 
-        // TODO: Add your update logic here
+        Globals.Update(gameTime);
+        _mapManager.Update();
 
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.CornflowerBlue);
-
-        // TODO: Add your drawing code here
-
+        GraphicsDevice.Clear(Color.Black);
+        _spriteBatch.Begin(
+            SpriteSortMode.Deferred,
+            BlendState.AlphaBlend,
+            SamplerState.PointClamp, null, null, null,
+            null);
+        _mapManager.Draw();
+        _spriteBatch.End();
         base.Draw(gameTime);
     }
+
+    private MapManager.MapManager _mapManager;
 }
