@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
 using BebraProject.Animation;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
@@ -43,57 +44,78 @@ public class Pacman
             (int)Math.Round(_spritePosition.Y / _tileSize.Y));
         var add = Speed * Globals.TotalSeconds;
 
+        var dir = Point.Zero;
+        var dirQueued = Point.Zero;
 
-        if (_direction is Direction.E or Direction.W)
-        {
-            if (_lastDirection is Direction.N or Direction.S)
-                GridPosition.Y = (int)Math.Round(_spritePosition.Y / _tileSize.Y);
-            _spritePosition.Y = GridPosition.Y * _tileSize.Y;
-        } 
-        if (_direction is Direction.N or Direction.S)
-        {
-            if (_lastDirection is Direction.E or Direction.W)
-                GridPosition.X = (int)Math.Round(_spritePosition.X / _tileSize.X);
-            _spritePosition.X = GridPosition.X * _tileSize.X;
-        } 
-        
-        
         switch (_direction)
         {
-            case Direction.W:
-                GridPosition.X = (int)Math.Ceiling(_spritePosition.X / _tileSize.X);
-                if (_mapManager.Map[GridPosition.X - 1, GridPosition.Y] == 0)
-                    _spritePosition.X -= add;
-                break;
-            case Direction.E:
-                GridPosition.X = (int)Math.Floor(_spritePosition.X / _tileSize.X);
-                if (_mapManager.Map[GridPosition.X + 1, GridPosition.Y] == 0)
-                    _spritePosition.X += add;
-                break;
-            case Direction.N:
-                GridPosition.Y = (int)Math.Ceiling(_spritePosition.Y / _tileSize.Y);
-
-                if (_mapManager.Map[GridPosition.X, GridPosition.Y - 1] == 0)
-                    _spritePosition.Y -= add;
-                break;
-            case Direction.S:
-                GridPosition.Y = (int)Math.Floor(_spritePosition.Y / _tileSize.Y);
-                if (_mapManager.Map[GridPosition.X, GridPosition.Y + 1] == 0)
-                    _spritePosition.Y += add;
-                break;
-
+            case Direction.W: GridPosition.X = (int)Math.Ceiling(_spritePosition.X / _tileSize.X); dir.X = -1; break;
+            case Direction.E: GridPosition.X = (int)Math.Floor(_spritePosition.X / _tileSize.X); dir.X = 1; break;
+            case Direction.N: GridPosition.Y = (int)Math.Ceiling(_spritePosition.Y / _tileSize.Y); dir.Y = -1; break;
+            case Direction.S: GridPosition.Y = (int)Math.Floor(_spritePosition.Y / _tileSize.Y); dir.Y = 1; break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
+
+        switch (_directionQueued)
+        {
+            case Direction.W: dirQueued.X = -1; break;
+            case Direction.E: dirQueued.X = 1; break;
+            case Direction.N: dirQueued.Y = -1; break;
+            case Direction.S: dirQueued.Y = 1; break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
+        var centered = false;
+        {
+            var center = GridPosition.ToVector2() * _tileSize + _tileSize / 2;
+            var position = _spritePosition + _tileSize / 2;
+            var e = new Vector2(2, 2);
+            var diff = AbsV2(position - center);
+            if (V2IsLessThanV2(diff, e))
+                centered = true;
+        }
+
+        if (centered && _mapManager.Map[GridPosition.X + dir.X, GridPosition.Y + dir.Y] == 1)
+        {
+            _stop = true;
+        }
+
+        if (centered && _direction != _directionQueued)
+        {
+            if (_mapManager.Map[GridPosition.X + dirQueued.X, GridPosition.Y + dirQueued.Y] == 0)
+            {
+                _direction = _directionQueued;
+                _stop = false;
+                return;
+            }
+        }
+        
+        if (!_stop)
+        {
+            _spritePosition += dir.ToVector2() * add;
+        }
     }
 
+    private Vector2 AbsV2(Vector2 v2)
+    {
+        if (v2.X < 0) v2.X = -v2.X;
+        if (v2.Y < 0) v2.Y = -v2.Y;
+        return v2;
+    }
+
+    private bool V2IsLessThanV2(Vector2 a, Vector2 b)
+    {
+        return a.X < b.X && a.Y < b.Y;
+    }
+    
     private void UpdateControls()
     {
-        _lastDirection = _direction;
-        if (Input.Keyboard.IsKeyPressedOnce(Keys.A)) _direction = Direction.W;
-        if (Input.Keyboard.IsKeyPressedOnce(Keys.D)) _direction = Direction.E;
-        if (Input.Keyboard.IsKeyPressedOnce(Keys.W)) _direction = Direction.N;
-        if (Input.Keyboard.IsKeyPressedOnce(Keys.S)) _direction = Direction.S;
+        if (Input.Keyboard.IsKeyPressedOnce(Keys.A)) _directionQueued = Direction.W;
+        if (Input.Keyboard.IsKeyPressedOnce(Keys.D)) _directionQueued = Direction.E;
+        if (Input.Keyboard.IsKeyPressedOnce(Keys.W)) _directionQueued = Direction.N;
+        if (Input.Keyboard.IsKeyPressedOnce(Keys.S)) _directionQueued = Direction.S;
     }
     
 
@@ -101,9 +123,10 @@ public class Pacman
     private Dictionary<Direction, Animation> _animationSet = new();
     private readonly Vector2 _tileSize = new(16, 16);
     private Direction _direction = Direction.E;
-    private Direction _lastDirection = Direction.E;
+    private Direction _directionQueued = Direction.E;
     private float Speed = 100f;
     private MapManager.MapManager _mapManager;
+    private bool _stop = false;
 
     private enum Direction
     {
