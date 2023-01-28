@@ -13,6 +13,7 @@ public class Game1 : Game
     private SpriteBatch _spriteBatch;
 
     private readonly Point GridSize = new (8, 8);
+    private readonly Point UIScale = new (2, 2);
     
     public Game1()
     {
@@ -28,8 +29,8 @@ public class Game1 : Game
         Globals.Content = Content;
         _mapManager.Init();
         _pacman.Init();
-        _graphics.PreferredBackBufferWidth = GridSize.X * ((int)_mapManager.TileSize.X * 2 + 1);
-        _graphics.PreferredBackBufferHeight = GridSize.Y * ((int)_mapManager.TileSize.Y * 2 + 1);
+        _graphics.PreferredBackBufferWidth = GridSize.X * ((int)_mapManager.TileSize.X * 2 + 1) * UIScale.X;
+        _graphics.PreferredBackBufferHeight = GridSize.Y * ((int)_mapManager.TileSize.Y * 2 + 1) * UIScale.Y;
         _graphics.ApplyChanges();
 
 
@@ -60,11 +61,11 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.Black);
+        var matrix = Matrix.CreateScale(UIScale.X, UIScale.Y, 1.0f);
         _spriteBatch.Begin(
             SpriteSortMode.Deferred,
             BlendState.AlphaBlend,
-            SamplerState.PointClamp, null, null, null,
-            null);
+            SamplerState.PointClamp, null, null, null, matrix);
         _mapManager.Draw();
         _pacman.Draw();
         _spriteBatch.End();
