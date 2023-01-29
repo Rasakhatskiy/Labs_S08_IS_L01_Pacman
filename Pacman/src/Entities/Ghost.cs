@@ -10,6 +10,10 @@ namespace Pacman.Entities;
 
 public class Ghost
 {
+    public int PathLenght => _pathStack?.Count ?? 0;
+
+    public string AlgorithmType => _greedy ? "Greedy" : "A*";
+    
     public enum GhostColor
     {
         Red = 0, 

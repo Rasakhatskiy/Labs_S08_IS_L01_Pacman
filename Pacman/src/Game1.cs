@@ -26,6 +26,17 @@ public class Game1 : Game
         _ghost = new Ghost(_mapManager, _pacman, Ghost.GhostColor.Red);
     }
 
+    private void RestartGame()
+    {
+        _mapManager = new MapManager.MapManager(GridSize);
+        _pacman = new Entities.Pacman(_mapManager);
+        _ghost = new Ghost(_mapManager, _pacman, Ghost.GhostColor.Red);
+        
+        _mapManager.Init();
+        _pacman.Init();
+        _ghost.Init();
+    }
+
     protected override void Initialize()
     {
         Globals.Content = Content;
@@ -55,10 +66,16 @@ public class Game1 : Game
 
         Globals.Update(gameTime);
         InputManager.Update();
+        
+        if (Input.Keyboard.IsKeyPressedOnce(Keys.R))
+            RestartGame();
+        
         _mapManager.Update();
         _pacman.Update();
         _ghost.Update();
 
+        Window.Title = $"Path length: {_ghost.PathLenght}. Algo: {_ghost.AlgorithmType}";
+        
         base.Update(gameTime);
     }
 
