@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Pacman.Entities;
 using Pacman.Input;
 using Pacman.MazeGenerator;
 using Keyboard = Microsoft.Xna.Framework.Input.Keyboard;
@@ -22,6 +23,7 @@ public class Game1 : Game
         IsMouseVisible = true;
         _mapManager = new MapManager.MapManager(GridSize);
         _pacman = new Entities.Pacman(_mapManager);
+        _ghost = new Ghost(_mapManager, _pacman, Ghost.GhostColor.Red);
     }
 
     protected override void Initialize()
@@ -29,6 +31,7 @@ public class Game1 : Game
         Globals.Content = Content;
         _mapManager.Init();
         _pacman.Init();
+        _ghost.Init();
         _graphics.PreferredBackBufferWidth = GridSize.X * ((int)_mapManager.TileSize.X * 2 + 1) * UIScale.X;
         _graphics.PreferredBackBufferHeight = GridSize.Y * ((int)_mapManager.TileSize.Y * 2 + 1) * UIScale.Y;
         _graphics.ApplyChanges();
@@ -54,6 +57,7 @@ public class Game1 : Game
         InputManager.Update();
         _mapManager.Update();
         _pacman.Update();
+        _ghost.Update();
 
         base.Update(gameTime);
     }
@@ -68,10 +72,12 @@ public class Game1 : Game
             SamplerState.PointClamp, null, null, null, matrix);
         _mapManager.Draw();
         _pacman.Draw();
+        _ghost.Draw();
         _spriteBatch.End();
         base.Draw(gameTime);
     }
 
     private MapManager.MapManager _mapManager;
     private Entities.Pacman _pacman;
+    private Entities.Ghost _ghost;
 }

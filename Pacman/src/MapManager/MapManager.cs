@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BebraProject.Animation;
 using Microsoft.Xna.Framework;
 
@@ -7,14 +8,20 @@ namespace Pacman.MapManager;
 public class MapManager
 {
     public int[,] Map;
-    
+    public List<Point> Obstacles { get; } = new();
+
     public MapManager(Point size)
     {
         var generator = new MazeGenerator.MazeGenerator(size, Point.Zero);
         _size = new Point(size.X * 2 + 1, size.Y * 2 + 1);
 
         Map = generator.GetArray();
+        for (var i = 0; i < Map.GetLength(0); i++)
+        for (var j = 0; j < Map.GetLength(1); j++)
+            if (Map[i,j] == 1)
+                Obstacles.Add(new Point(i, j));
     }
+
 
 
     public void Init()

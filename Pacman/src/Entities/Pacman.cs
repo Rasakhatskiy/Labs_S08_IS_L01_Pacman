@@ -10,10 +10,16 @@ namespace Pacman.Entities;
 
 public class Pacman
 {
+    public Point GridPosition = new Point(1,1);
+
+    private Point _previousGridPosition;
+    public bool GridPositionChanged => GridPosition != _previousGridPosition;
+    
     public Pacman(MapManager.MapManager mapManager)
     {
         _mapManager = mapManager;
         _spritePosition = mapManager.GetCentralEmptyPoint().ToVector2() * _tileSize;
+        _previousGridPosition = new Point(-1, -1);
     }
 
     public void Init()
@@ -39,7 +45,8 @@ public class Pacman
 
     private void UpdatePosition()
     {
-        var GridPosition = new Point(
+        _previousGridPosition = GridPosition;
+        GridPosition = new Point(
             (int)Math.Round(_spritePosition.X / _tileSize.X),
             (int)Math.Round(_spritePosition.Y / _tileSize.Y));
         var add = Speed * Globals.TotalSeconds;
